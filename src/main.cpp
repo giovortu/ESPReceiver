@@ -2,13 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <espnow.h>
 
-#define RETRY_INTERVAL 5000
-
-uint8_t mac[] = {0x82, 0x88, 0x88, 0x88, 0x88, 0x88};
-
-//static uint8_t PEER[] = {0x02, 0x00, 0x00, 0x45, 0x53, 0x50};
-static uint8_t broadcastAddress[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-
+#define RETRY_INTERVAL 2000
 
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len) 
 {
@@ -21,16 +15,18 @@ void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t 
 
 void setup() {
   WiFi.mode(WIFI_STA);
-
   Serial.begin(115200);
+
 #ifdef VERBOSE
   Serial.println("ESP-Now Receiver");
   Serial.printf("Transmitter mac: %s\n", WiFi.macAddress().c_str());
 #endif
+
   if (esp_now_init() != 0) 
   {
-   
+#ifdef VERBOSE   
     Serial.println("ESP_Now init failed...");
+#endif    
     delay(RETRY_INTERVAL);
     ESP.restart();
   }
