@@ -1,15 +1,25 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <espnow.h>
+#include <ArduinoJson.h>
 
 #define RETRY_INTERVAL 2000
 
+
+bool validateJson(const char* input) {
+  StaticJsonDocument<0> doc, filter;
+  return deserializeJson(doc, input, DeserializationOption::Filter(filter)) == DeserializationError::Ok;
+}
+
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len) 
 {
-  Serial.println( (char*) incomingData );
-  uint8_t msg[] = "OK";
-  uint8_t msg_len = sizeof(msg);
-  esp_now_send(senderMac, msg, msg_len);
+  //if ( validateJson((char*) incomingData) ) 
+  {  
+    Serial.println( (char*) incomingData );
+    uint8_t msg[] = "OK";
+    uint8_t msg_len = sizeof(msg);
+    esp_now_send(senderMac, msg, msg_len);
+  }
 }
 
 
