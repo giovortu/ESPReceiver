@@ -5,25 +5,54 @@
 
 #define RETRY_INTERVAL 2000
 
+StaticJsonDocument<1024> doc;
 
-bool validateJson(const char* input) {
+
+bool validateJson(const char* input) 
+{
   StaticJsonDocument<0> doc, filter;
   return deserializeJson(doc, input, DeserializationOption::Filter(filter)) == DeserializationError::Ok;
 }
 
+//wait for a message to come in from the setial port and return it
+String receiveSerialMessage()
+ {
+  String message = "";
+  while (Serial.available()) 
+  {
+    // read the incoming byte:
+    char incomingByte = Serial.read();
+    message += incomingByte;
+  }
+  return message;
+}
+
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len) 
 {
-  //if ( validateJson((char*) incomingData) ) 
+  if ( validateJson((char*) incomingData) ) 
   {  
     Serial.println( (char*) incomingData );
-    uint8_t msg[] = "OK";
-    uint8_t msg_len = sizeof(msg);
-    esp_now_send(senderMac, msg, msg_len);
+
+    String response = receiveSerialMessage();
+
+    DeserializationError error = deserializeJson(doc, response);
+
+    if ( error ) // no data
+    {
+      uint8_t msg[] = "{}";
+      uint8_t msg_len = sizeof(msg);
+      esp_now_send(senderMac, msg, msg_len);
+    }
+    else
+    {
+      esp_now_send (senderMac, (uint8_t*) response.c_str(), response.length());
+    }
   }
 }
 
 
-void setup() {
+void setup()
+{
   WiFi.mode(WIFI_STA);
   Serial.begin(115200);
 
