@@ -39,7 +39,7 @@ void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t 
 
     if ( error ) // no data
     {
-      uint8_t msg[] = "{}";
+      uint8_t msg[] = "OK";
       uint8_t msg_len = sizeof(msg);
       esp_now_send(senderMac, msg, msg_len);
     }
